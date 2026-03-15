@@ -5,7 +5,7 @@ function App() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch("https://rentease-production-4.up.railway.app/api/products")
+    fetch("https://rentease-production-4.up.railway.app/api/products/all")
       .then(response => response.json())
       .then(data => setProducts(data))
       .catch(error => console.error(error));
