@@ -6,16 +6,17 @@ function App() {
 
   useEffect(() => {
     fetch("https://rentease-production-4.up.railway.app/api/products")
-      .then(res => res.json())
-      .then(data => setProducts(data));
+      .then(response => response.json())
+      .then(data => setProducts(data))
+      .catch(error => console.error(error));
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h1>RentEase Products</h1>
 
       {products.map(product => (
-        <div key={product.id}>
+        <div key={product.id} style={{ border: "1px solid gray", padding: "10px", margin: "10px" }}>
           <h3>{product.name}</h3>
           <p>{product.description}</p>
           <p>Rent: ₹{product.monthlyRent}</p>
