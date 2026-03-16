@@ -1,25 +1,52 @@
-<div className="card mb-4 shadow">
+import React, { useEffect, useState } from "react";
 
-<img
-  src={product.imageUrl ? product.imageUrl : "https://picsum.photos/400/300"}
-  alt={product.name}
-  style={{ width: "100%", height: "200px", objectFit: "cover" }}
-/>
+function App() {
 
-  <div className="card-body">
+  const [products, setProducts] = useState([]);
 
-    <h5 className="card-title">{product.name}</h5>
+  useEffect(() => {
+    fetch("https://rentease-production-4.up.railway.app/api/products/all")
+      .then(res => res.json())
+      .then(data => setProducts(data))
+      .catch(err => console.log(err));
+  }, []);
 
-    <p className="card-text">{product.description}</p>
+  return (
+    <div style={{ padding: "20px" }}>
 
-    <p><b>Category:</b> {product.category}</p>
+      <h1>RentEase Products</h1>
 
-    <p><b>City:</b> {product.city}</p>
+      {products.map(product => (
 
-    <p className="text-success">
-      ₹{product.monthlyRent} / month
-    </p>
+        <div
+          key={product.id}
+          style={{
+            border: "1px solid gray",
+            padding: "10px",
+            margin: "10px"
+          }}
+        >
 
-  </div>
+          <img
+            src={product.imageUrl || "https://picsum.photos/400/300"}
+            alt={product.name}
+            style={{
+              width: "100%",
+              height: "200px",
+              objectFit: "cover"
+            }}
+          />
 
-</div>
+          <h3>{product.name}</h3>
+          <p>{product.description}</p>
+          <p>₹{product.monthlyRent}</p>
+
+        </div>
+
+      ))}
+
+    </div>
+  );
+}
+
+export default App;
