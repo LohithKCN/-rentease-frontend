@@ -1,10 +1,10 @@
 <div className="card mb-4 shadow">
 
-  <img
-    src={product.imageUrl ? product.imageUrl : "https://via.placeholder.com/300"}
-    className="card-img-top"
-    alt={product.name}
-  />
+<img
+  src={product.imageUrl ? product.imageUrl : "https://picsum.photos/400/300"}
+  alt={product.name}
+  style={{ width: "100%", height: "200px", objectFit: "cover" }}
+/>
 
   <div className="card-body">
 
