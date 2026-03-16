@@ -1,55 +1,25 @@
-import React, { useEffect, useState } from "react";
+<div className="card mb-4 shadow">
 
-function App() {
+  <img
+    src={product.imageUrl ? product.imageUrl : "https://via.placeholder.com/300"}
+    className="card-img-top"
+    alt={product.name}
+  />
 
-  const [products, setProducts] = useState([]);
+  <div className="card-body">
 
-  useEffect(() => {
-    fetch("https://rentease-production-4.up.railway.app/api/products/all")
-      .then(res => res.json())
-      .then(data => setProducts(data))
-      .catch(err => console.log(err));
-  }, []);
+    <h5 className="card-title">{product.name}</h5>
 
-  return (
-    <div className="container mt-4">
+    <p className="card-text">{product.description}</p>
 
-      <h1 className="text-center mb-4">RentEase Products</h1>
+    <p><b>Category:</b> {product.category}</p>
 
-      <div className="row">
+    <p><b>City:</b> {product.city}</p>
 
-        {products.map(product => (
+    <p className="text-success">
+      ₹{product.monthlyRent} / month
+    </p>
 
-          <div className="col-md-4" key={product.id}>
+  </div>
 
-            <div className="card mb-4 shadow">
-
-              <div className="card-body">
-
-                <h5 className="card-title">{product.name}</h5>
-
-                <p className="card-text">{product.description}</p>
-
-                <p><b>Category:</b> {product.category}</p>
-
-                <p><b>City:</b> {product.city}</p>
-
-                <p className="text-success">
-                  ₹{product.monthlyRent} / month
-                </p>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        ))}
-
-      </div>
-
-    </div>
-  );
-}
-
-export default App;
+</div>
