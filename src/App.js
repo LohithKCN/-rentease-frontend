@@ -11,6 +11,28 @@ function App() {
       .catch(err => console.log(err));
   }, []);
 
+  const rentProduct = async (productId) => {
+
+    const rental = {
+      product: { id: productId },
+      quantity: 1,
+      status: "ACTIVE"
+    };
+
+    await fetch(
+      "https://rentease-production-4.up.railway.app/api/rentals/rent",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(rental)
+      }
+    );
+
+    alert("Product rented successfully 🚀");
+  };
+
   return (
     <div style={{ padding: "20px" }}>
 
@@ -23,7 +45,8 @@ function App() {
           style={{
             border: "1px solid gray",
             padding: "10px",
-            margin: "10px"
+            margin: "10px",
+            width: "300px"
           }}
         >
 
@@ -39,7 +62,20 @@ function App() {
 
           <h3>{product.name}</h3>
           <p>{product.description}</p>
-          <p>₹{product.monthlyRent}</p>
+          <p>₹{product.monthlyRent} / month</p>
+
+          <button
+            onClick={() => rentProduct(product.id)}
+            style={{
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              padding: "8px 12px",
+              cursor: "pointer"
+            }}
+          >
+            Rent Now
+          </button>
 
         </div>
 
