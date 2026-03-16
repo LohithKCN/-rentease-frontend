@@ -11,12 +11,14 @@ function App() {
       .catch(err => console.log(err));
   }, []);
 
-  const rentProduct = async (productId) => {
+  const rentProduct = async (product) => {
 
     const rental = {
-      product: { id: productId },
+      product: { id: product.id },
       quantity: 1,
-      status: "ACTIVE"
+      startDate: new Date().toISOString().split("T")[0],
+      status: "ACTIVE",
+      totalAmount: product.monthlyRent
     };
 
     await fetch(
@@ -37,6 +39,11 @@ function App() {
     <div style={{ padding: "20px" }}>
 
       <h1>RentEase Products</h1>
+
+      <div style={{ marginBottom: "20px" }}>
+        <button>Products</button>
+        <button>My Rentals</button>
+      </div>
 
       {products.map(product => (
 
@@ -65,7 +72,7 @@ function App() {
           <p>₹{product.monthlyRent} / month</p>
 
           <button
-            onClick={() => rentProduct(product.id)}
+            onClick={() => rentProduct(product)}
             style={{
               background: "#007bff",
               color: "white",
