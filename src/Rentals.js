@@ -1,58 +1,60 @@
 import React, { useEffect, useState } from "react";
 
-function Rentals() {
+function Rentals(){
 
-  const [rentals, setRentals] = useState([]);
+ const [rentals,setRentals] = useState([]);
 
-  useEffect(() => {
-    fetch("https://rentease-production-4.up.railway.app/api/rentals/all")
-      .then(res => res.json())
-      .then(data => setRentals(data))
-      .catch(err => console.log(err));
-  }, []);
+ useEffect(()=>{
+   fetch("https://rentease-production-4.up.railway.app/api/rentals/all")
+   .then(res=>res.json())
+   .then(data=>setRentals(data));
+ },[]);
 
-  return (
+ const returnProduct = async (id) => {
 
-    <div style={{padding:"20px"}}>
+   await fetch(
+     `https://rentease-production-4.up.railway.app/api/rentals/return/${id}`,
+     {
+       method:"PUT"
+     }
+   );
 
-      <h1>My Rentals</h1>
+   alert("Product returned successfully");
 
-      {rentals.map(r => (
+   window.location.reload();
+ };
 
-        <div key={r.id} style={{
-          border:"1px solid gray",
-          padding:"10px",
-          margin:"10px",
-          width:"300px"
-        }}>
+ return(
+  <div>
 
-          <img
-            src={r.product.imageUrl || "https://picsum.photos/400/300"}
-            alt={r.product.name}
-            style={{
-              width:"100%",
-              height:"200px",
-              objectFit:"cover"
-            }}
-          />
+   <h2>My Rentals</h2>
 
-          <h3>{r.product.name}</h3>
+   {rentals.map(r => (
 
-          <p><b>Status:</b> {r.status}</p>
+     <div key={r.id} style={{border:"1px solid gray",margin:"10px",padding:"10px"}}>
 
-          <p><b>Start Date:</b> {r.startDate}</p>
+       <p><b>Product:</b> {r.product.name}</p>
 
-          <p><b>End Date:</b> {r.endDate}</p>
+       <p><b>Status:</b> {r.status}</p>
 
-          <p><b>Price:</b> ₹{r.totalAmount}</p>
+       <p><b>From:</b> {r.startDate}</p>
 
-        </div>
+       <p><b>To:</b> {r.endDate}</p>
 
-      ))}
+       {r.status === "ACTIVE" && (
 
-    </div>
+        <button onClick={()=>returnProduct(r.id)}>
+          Return Product
+        </button>
 
-  );
+       )}
+
+     </div>
+
+   ))}
+
+  </div>
+ );
 }
 
 export default Rentals;
