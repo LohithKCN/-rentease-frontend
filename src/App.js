@@ -16,12 +16,12 @@ function App() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-
+  // 💬 CHAT STATES
   const [showChat, setShowChat] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-
+  // ✅ LOAD PRODUCTS
   useEffect(() => {
     if (page === "products") {
       fetch(BASE_URL + "/api/products/all")
@@ -31,14 +31,12 @@ function App() {
     }
   }, [page]);
 
-
+  // ✅ LOGIN
   const login = async () => {
     try {
       const res = await fetch(BASE_URL + "/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
       });
 
@@ -58,14 +56,12 @@ function App() {
     }
   };
 
-
+  // ✅ REGISTER
   const register = async () => {
     try {
       const res = await fetch(BASE_URL + "/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           email,
@@ -83,15 +79,14 @@ function App() {
     }
   };
 
-
+  // 💬 SEND MESSAGE
   const sendMessage = () => {
     if (!message) return;
-
     setMessages([...messages, message]);
     setMessage("");
   };
 
-
+  // ✅ RENT FUNCTION
   const confirmRent = async () => {
 
     if (!startDate || !endDate) {
@@ -134,7 +129,7 @@ function App() {
     }
   };
 
-
+  // 🔐 LOGIN PAGE
   if (page === "login") {
     return (
       <div style={{ padding: "20px" }}>
@@ -158,7 +153,7 @@ function App() {
     );
   }
 
-
+  // 🏠 MAIN APP
   return (
     <div style={{ padding: "20px" }}>
 
@@ -184,7 +179,7 @@ function App() {
         </button>
       </div>
 
-      {}
+      {/* PRODUCTS */}
       {page === "products" && (
         <div>
 
@@ -242,7 +237,7 @@ function App() {
 
       {page === "rentals" && <Rentals />}
 
-      {
+      {/* 💬 CHAT BUTTON */}
       <button
         onClick={() => setShowChat(!showChat)}
         style={{
@@ -257,10 +252,10 @@ function App() {
           cursor: "pointer"
         }}
       >
-
+        💬
       </button>
 
-      {
+      {/* 💬 CHAT BOX */}
       {showChat && (
         <div style={{
           position: "fixed",
