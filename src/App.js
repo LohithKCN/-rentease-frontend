@@ -3,192 +3,305 @@ import Rentals from "./Rentals";
 
 function App() {
 
-const [products, setProducts] = useState([]);
-const [selectedProduct, setSelectedProduct] = useState(null);
-const [startDate, setStartDate] = useState("");
-const [endDate, setEndDate] = useState("");
-const [page, setPage] = useState("products");
+  const BASE_URL = "https://rentease-production-4.up.railway.app";
 
-useEffect(() => {
-fetch("https://rentease-production-4.up.railway.app/api/products/all")
-.then(res => res.json())
-.then(data => setProducts(data))
-.catch(err => console.log(err));
-}, []);
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-const confirmRent = async () => {
+  const [page, setPage] = useState("login");
 
-  if (!startDate || !endDate) {
-    alert("Please select rental dates");
-    return;
-  }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
-  const rental = {
-    product: { id: selectedProduct.id },
-    quantity: 1,
-    startDate: startDate,
-    endDate: endDate,
-    status: "ACTIVE",
-    totalAmount: selectedProduct.monthlyRent
-  };
 
-  try {
+  useEffect(() => {
+    if (page === "products") {
+      fetch(BASE_URL + "/api/products/all")
+        .then(res => res.json())
+        .then(data => setProducts(data))
+        .catch(err => console.log(err));
+    }
+  }, [page]);
 
-    const response = await fetch(
-      "https://rentease-production-4.up.railway.app/api/rentals/rent",
-      {
+
+  const login = async () => {
+    try {
+      const res = await fetch(BASE_URL + "/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(rental)
-      }
-    );
+        body: JSON.stringify({
+          email,
+          password
+        })
+      });
 
-    if (!response.ok) {
-      throw new Error("Network error");
+      const text = await res.text();
+
+      if (text.includes("Invalid")) {
+        alert("Login failed ❌");
+      } else {
+        localStorage.setItem("token", text);
+        alert("Login success ✅");
+        setPage("products");
+      }
+
+    } catch (error) {
+      console.log(error);
+      alert("Login error ❌");
+    }
+  };
+
+
+  const register = async () => {
+    try {
+      const res = await fetch(BASE_URL + "/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+          role: "USER"
+        })
+      });
+
+      await res.json();
+      alert("Registered successfully ✅");
+
+    } catch (error) {
+      console.log(error);
+      alert("Register failed ❌");
+    }
+  };
+
+
+  const confirmRent = async () => {
+
+    if (!startDate || !endDate) {
+      alert("Please select rental dates");
+      return;
     }
 
-    alert("Product rented successfully 🚀");
+    const token = localStorage.getItem("token");
 
-    setSelectedProduct(null);
-    setStartDate("");
-    setEndDate("");
+    const rental = {
+      product: { id: selectedProduct.id },
+      quantity: 1,
+      startDate,
+      endDate,
+      status: "ACTIVE",
+      totalAmount: selectedProduct.monthlyRent
+    };
 
-  } catch (error) {
-    console.log(error);
-    alert("Error renting product");
+    try {
+      const response = await fetch(BASE_URL + "/api/rentals/rent", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify(rental)
+      });
+
+      if (!response.ok) {
+        throw new Error("Network error");
+      }
+
+      alert("Product rented successfully 🚀");
+
+      setSelectedProduct(null);
+      setStartDate("");
+      setEndDate("");
+
+    } catch (error) {
+      console.log(error);
+      alert("Error renting product");
+    }
+  };
+
+
+  if (page === "login") {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h2>Login</h2>
+
+        <input
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        /><br /><br />
+
+        <input
+          placeholder="Password"
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+        /><br /><br />
+
+        <button onClick={login}>Login</button>
+
+        <hr />
+
+        <h3>Register</h3>
+
+        <input
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+        /><br /><br />
+
+        <input
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        /><br /><br />
+
+        <input
+          placeholder="Password"
+          type="password"
+          onChange={(e) => setPassword(e.target.value)}
+        /><br /><br />
+
+        <button onClick={register}>Register</button>
+      </div>
+    );
   }
 
-};
 
-return (
-<div style={{ padding: "20px" }}>
+  return (
+    <div style={{ padding: "20px" }}>
 
+      <h1>RentEase</h1>
 
-  <h1>RentEase</h1>
+      <div style={{ marginBottom: "20px" }}>
+        <button onClick={() => setPage("products")} style={{ marginRight: "10px" }}>
+          Products
+        </button>
 
-  <div style={{ marginBottom: "20px" }}>
-    <button onClick={() => setPage("products")} style={{ marginRight: "10px" }}>
-      Products
-    </button>
+        <button onClick={() => setPage("rentals")}>
+          My Rentals
+        </button>
 
-    <button onClick={() => setPage("rentals")}>
-      My Rentals
-    </button>
-  </div>
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            setPage("login");
+          }}
+          style={{ marginLeft: "10px", background: "red", color: "white" }}
+        >
+          Logout
+        </button>
+      </div>
 
-  {page === "products" && (
+      {page === "products" && (
 
-    <div>
+        <div>
 
-      {selectedProduct && (
+          {selectedProduct && (
 
-        <div style={{
-          border: "1px solid black",
-          padding: "20px",
-          marginBottom: "20px",
-          width: "300px"
-        }}>
+            <div style={{
+              border: "1px solid black",
+              padding: "20px",
+              marginBottom: "20px",
+              width: "300px"
+            }}>
 
-          <h3>Rent {selectedProduct.name}</h3>
+              <h3>Rent {selectedProduct.name}</h3>
 
-          <label>From Date</label>
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
+              <label>From Date</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
 
-          <br /><br />
+              <br /><br />
 
-          <label>To Date</label>
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
+              <label>To Date</label>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
 
-          <br /><br />
+              <br /><br />
 
-          <button onClick={confirmRent}>
-            Confirm Rent
-          </button>
+              <button onClick={confirmRent}>
+                Confirm Rent
+              </button>
 
-          <button
-            onClick={() => setSelectedProduct(null)}
-            style={{ marginLeft: "10px" }}
-          >
-            Cancel
-          </button>
+              <button
+                onClick={() => setSelectedProduct(null)}
+                style={{ marginLeft: "10px" }}
+              >
+                Cancel
+              </button>
 
-        </div>
-      )}
+            </div>
+          )}
 
-      <div style={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: "20px"
-      }}>
+          <div style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "20px"
+          }}>
 
-        {products.map(product => (
+            {products.map(product => (
 
-          <div
-            key={product.id}
-            style={{
-              border: "1px solid gray",
-              padding: "10px",
-              margin: "10px",
-              width: "300px",
-              borderRadius: "10px"
-            }}
-          >
+              <div
+                key={product.id}
+                style={{
+                  border: "1px solid gray",
+                  padding: "10px",
+                  width: "300px",
+                  borderRadius: "10px"
+                }}
+              >
 
-            <img
-              src={product.imageUrl || "https://picsum.photos/400/300"}
-              alt={product.name}
-              style={{
-                width: "100%",
-                height: "200px",
-                objectFit: "cover"
-              }}
-            />
+                <img
+                  src={product.imageUrl || "https://picsum.photos/400/300"}
+                  alt={product.name}
+                  style={{
+                    width: "100%",
+                    height: "200px",
+                    objectFit: "cover"
+                  }}
+                />
 
-            <h3>{product.name}</h3>
+                <h3>{product.name}</h3>
+                <p>{product.description}</p>
+                <p>₹{product.monthlyRent} / month</p>
 
-            <p>{product.description}</p>
+                <button
+                  onClick={() => setSelectedProduct(product)}
+                  style={{
+                    background: "#007bff",
+                    color: "white",
+                    border: "none",
+                    padding: "8px 12px",
+                    cursor: "pointer"
+                  }}
+                >
+                  Rent Now
+                </button>
 
-            <p>₹{product.monthlyRent} / month</p>
+              </div>
 
-            <button
-              onClick={() => setSelectedProduct(product)}
-              style={{
-                background: "#007bff",
-                color: "white",
-                border: "none",
-                padding: "8px 12px",
-                cursor: "pointer"
-              }}
-            >
-              Rent Now
-            </button>
+            ))}
 
           </div>
 
-        ))}
+        </div>
 
-      </div>
+      )}
+
+      {page === "rentals" && <Rentals />}
 
     </div>
-
-  )}
-
-  {page === "rentals" && <Rentals />}
-
-</div>
-
-
-);
+  );
 }
 
 export default App;
