@@ -16,12 +16,12 @@ function App() {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
-  // 💬 CHAT STATES
-  const [showChat, setShowChat] = useState(false);
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
+  // 💬 CHAT WITH OWNER STATES
+  const [chatProduct, setChatProduct] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
 
-  // ✅ LOAD PRODUCTS
+  // LOAD PRODUCTS
   useEffect(() => {
     if (page === "products") {
       fetch(BASE_URL + "/api/products/all")
@@ -31,12 +31,14 @@ function App() {
     }
   }, [page]);
 
-  // ✅ LOGIN
+  // LOGIN
   const login = async () => {
     try {
       const res = await fetch(BASE_URL + "/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ email, password })
       });
 
@@ -56,12 +58,14 @@ function App() {
     }
   };
 
-  // ✅ REGISTER
+  // REGISTER
   const register = async () => {
     try {
       const res = await fetch(BASE_URL + "/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           name,
           email,
@@ -79,14 +83,7 @@ function App() {
     }
   };
 
-  // 💬 SEND MESSAGE
-  const sendMessage = () => {
-    if (!message) return;
-    setMessages([...messages, message]);
-    setMessage("");
-  };
-
-  // ✅ RENT FUNCTION
+  // RENT FUNCTION
   const confirmRent = async () => {
 
     if (!startDate || !endDate) {
@@ -129,7 +126,7 @@ function App() {
     }
   };
 
-  // 🔐 LOGIN PAGE
+  // LOGIN PAGE
   if (page === "login") {
     return (
       <div style={{ padding: "20px" }}>
@@ -153,7 +150,6 @@ function App() {
     );
   }
 
-  // 🏠 MAIN APP
   return (
     <div style={{ padding: "20px" }}>
 
@@ -213,22 +209,40 @@ function App() {
                   alt={product.name}
                   style={{ width: "100%", height: "200px", objectFit: "cover" }}
                 />
+
                 <h3>{product.name}</h3>
                 <p>{product.description}</p>
                 <p>₹{product.monthlyRent} / month</p>
 
+                {/* RENT BUTTON */}
                 <button
                   onClick={() => setSelectedProduct(product)}
                   style={{
                     background: "#007bff",
                     color: "white",
                     border: "none",
-                    padding: "8px 12px",
+                    padding: "8px",
                     cursor: "pointer"
                   }}
                 >
                   Rent Now
                 </button>
+
+                {/* 💬 CHAT BUTTON */}
+                <button
+                  onClick={() => setChatProduct(product)}
+                  style={{
+                    background: "green",
+                    color: "white",
+                    border: "none",
+                    padding: "8px",
+                    marginTop: "10px",
+                    cursor: "pointer"
+                  }}
+                >
+                  Chat with Owner 💬
+                </button>
+
               </div>
             ))}
           </div>
@@ -237,54 +251,51 @@ function App() {
 
       {page === "rentals" && <Rentals />}
 
-      {/* 💬 CHAT BUTTON */}
-      <button
-        onClick={() => setShowChat(!showChat)}
-        style={{
+      {/* 💬 CHAT BOX */}
+      {chatProduct && (
+        <div style={{
           position: "fixed",
           bottom: "20px",
           right: "20px",
-          padding: "15px",
-          borderRadius: "50%",
-          background: "#007bff",
-          color: "white",
-          border: "none",
-          cursor: "pointer"
-        }}
-      >
-        💬
-      </button>
-
-      {/* 💬 CHAT BOX */}
-      {showChat && (
-        <div style={{
-          position: "fixed",
-          bottom: "80px",
-          right: "20px",
-          width: "300px",
+          width: "320px",
           height: "400px",
           background: "white",
-          border: "1px solid gray",
+          border: "2px solid black",
           borderRadius: "10px",
-          display: "flex",
-          flexDirection: "column",
-          padding: "10px"
+          padding: "10px",
+          zIndex: 9999
         }}>
-          <h4>Chat Support</h4>
+          <h4>Chat with Owner</h4>
+          <p><b>{chatProduct.name}</b></p>
 
-          <div style={{ flex: 1, overflowY: "auto", marginBottom: "10px" }}>
-            {messages.map((msg, index) => (
+          <div style={{ height: "250px", overflowY: "auto" }}>
+            {chatMessages.map((msg, index) => (
               <div key={index}>{msg}</div>
             ))}
           </div>
 
           <input
             placeholder="Type message..."
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
           />
 
-          <button onClick={sendMessage}>Send</button>
+          <button
+            onClick={() => {
+              if (!chatInput) return;
+              setChatMessages([...chatMessages, chatInput]);
+              setChatInput("");
+            }}
+          >
+            Send
+          </button>
+
+          <button
+            onClick={() => setChatProduct(null)}
+            style={{ marginTop: "5px", background: "red", color: "white" }}
+          >
+            Close
+          </button>
         </div>
       )}
 
